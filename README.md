@@ -3,6 +3,13 @@ This reposiroty is meant to reproduce the results in:
 "Parameterizing echo state networks for multi-step time series prediction"
 https://doi.org/10.1016/j.neucom.2022.11.044
 
+The below results are obtained by running reproduce_results.py
+Run the following commands to reproduce the results for the 4 datasets
+Neutral type DDE: python reproduce_results 0
+Lorenz: python reproduce_results 1
+MGS: python reproduce_results 2
+Laser: python reproduce_results 3
+
 Neutral type DDE washout 49
 Best R2 over 100 seeds: 0.999998788131173
 Median R2: 0.9999730616242031
