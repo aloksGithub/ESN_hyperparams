@@ -171,7 +171,7 @@ def getDataLaser():
     data = data[:2801,:]
     from scipy import stats
     data = stats.zscore(data)
-    params = [1024, 0.41, 0.906, 0.84, 1, 8.1e-7, 1, S_T, 74, 0, 'spawW', 0.84, 100]
+    params = [1024, 0.41, 0.906, 0.84, 1, 8.1e-7, 1, S_T, 300, 0, 'spawW', 0.84, 100]
     return data, params
 
 def getDataDDE():
@@ -196,7 +196,7 @@ def getDataMGS():
     data = data[:2801,:]
     from scipy import stats
     data = stats.zscore(data)
-    params = [2048, 0.68, 1.406, 0.44, 1, 6e-7, 1, S_T, 82, 0, 'sparW', 0.44, 286]
+    params = [2048, 0.68, 1.406, 0.44, 1, 6e-7, 1, S_T, 300, 0, 'sparW', 0.44, 286]
     return data, params
 
 
