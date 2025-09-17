@@ -178,14 +178,14 @@ def getDataDDE():
     global dim
     dim = 6
     data = np.load('Samples/Neutral_normed_2801.npy')
-    params = [256, 0.84, 0.995, 0.91, 1, 8.3e-7, 1, S_T, 49, 0, 'sparW', 0.91, 500]
+    params = [256, 0.84, 0.995, 0.91, 1, 8.3e-7, 1, S_T, 300, 0, 'sparW', 0.91, 500]
     return data, params
 
 def getDataLorenz():
     global dim
     dim = 3
     data = np.load('Samples/Lorenz_normed_2801.npy')
-    params = [2048, 0.88, 0, 0, 1, 1.1e-6, 1, S_T, 59, 0, 'sparW', 0, 444]
+    params = [2048, 0.88, 0, 0, 1, 1.1e-6, 1, S_T, 300, 0, 'sparW', 0, 444]
     return data, params
 
 def getDataMGS():
