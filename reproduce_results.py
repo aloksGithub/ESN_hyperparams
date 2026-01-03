@@ -46,12 +46,32 @@ import tracemalloc
 from scipy.stats import uniform
 from sklearn.metrics import r2_score
 import sys
-import multiprocessing as mp
-import os
 
 '''
 Global Stuff for the Network and Attractor
 '''
+
+def nrmse_func(y_true, y_pred):
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+    
+    diff = y_true - y_pred
+    mean_sq_error = np.mean(np.sum(diff**2, axis=1))
+    mean_norm = np.linalg.norm(np.mean(y_true, axis=0))
+        
+    rmse = np.sqrt(mean_sq_error)
+    
+    if mean_norm == 0:
+        return 100000
+        
+    error = rmse / mean_norm
+    return error
+    
+def r_squared(y_true, y_pred):
+    try:
+        return r2_score(y_true, y_pred, multioutput="variance_weighted")
+    except:
+        return 0
 
 
 def pooling(W, pool):
@@ -132,9 +152,7 @@ def network(params):
         W = W * (spectral_radius / original_spectral_radius)
     reservoir = ESN.ESN(lr=leak_rate, W=W, Win=Win, input_bias=input_bias, ridge=regularization_coef, Wfb=None, fbfunc=None)
     if reservoir == 0:
-        mse = 1e121
-        maxStep = -1
-        return (testLen-maxSteps)
+        return [np.inf, np.inf, -np.inf, np.inf]
     train_in = data[0:trainLen]
     train_out = data[0+1:trainLen+1]
     test_in = data[trainLen:trainLen+testLen]
@@ -153,8 +171,8 @@ def network(params):
     intMAE = np.mean(np.abs(internal.T-train_out[initLen:,:]))
 
     mse = np.mean((test_out[:] - output_pred[0])**2) 
-    nrmse = np.sqrt(np.mean((test_out[:] - output_pred[0])**2))/np.abs(np.mean(test_out[:]))
-    r2 = r2_score(test_out[:], output_pred[0])
+    nrmse = nrmse_func(test_out[:], output_pred[0])
+    r2 = r_squared(test_out[:], output_pred[0])
 
     mae = np.mean((np.abs((test_out[:]-output_pred[0]))))
     return [nrmse, mse, r2, intMAE]
@@ -201,22 +219,7 @@ def getDataMGS():
 
 
 
-def _init_worker(shared_data, shared_dim):
-    # Initialize per-process globals (Windows spawn)
-    global data, dim, WinInit, maskWin, maskW
-    data = shared_data
-    dim = int(shared_dim)
-    WinInit = np.random.rand(8192*2,dim+1) - 0.5
-    maskWin = np.random.rand(8192*2,WinInit.shape[1])
-    maskW = np.random.rand(8192*2,8192*2) #create a mask Uniform[0;1]
-
-def _eval_seed(args):
-    seed, base_params = args
-    p = list(base_params)
-    p[9] = int(seed)
-    result = network(p)
-    print(result[0], result[2])
-    return result
+ 
 
 if __name__ == '__main__':
     tracemalloc.start()
@@ -231,10 +234,14 @@ if __name__ == '__main__':
     maskWin = np.random.rand(8192*2,WinInit.shape[1])
     maskW = np.random.rand(8192*2,8192*2) #create a mask Uniform[0;1]
 
-    # Parallel evaluation across seeds
-    cpu_count = max(1, (os.cpu_count() or 1) - 1)
-    with mp.get_context("spawn").Pool(processes=4, initializer=_init_worker, initargs=(data, dim)) as pool:
-        results = list(pool.map(_eval_seed, [(int(s), best_params) for s in seedSet]))
+    # Sequential evaluation across seeds
+    results = []
+    for s in seedSet:
+        p = list(best_params)
+        p[9] = int(s)
+        r = network(p)
+        print(r[0], r[2])
+        results.append(r)
 
     # results: list of [nrmse, mse, r2, intMAE]
     results = np.asarray(results)
